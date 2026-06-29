@@ -97,17 +97,29 @@ export class HttpClient {
 
   async fetchText(url: string, accept = "text/html,application/json"): Promise<string> {
     let session = await this.ensureSession();
+    let lastError: unknown;
     for (let attempt = 0; attempt < 2; attempt++) {
       const jar = parseCookieHeader(session.cookieHeader);
-      const { status, body } = await this.fetchFollowing(url, jar, session.userAgent, accept);
-      if (status === 200 || (!isChallenge(status, body) && status < 300)) {
-        // Persist refreshed session cookies (e.g. new JSESSIONID) for subsequent requests.
-        this.session = { ...session, cookieHeader: serializeJar(jar) };
-        return body;
+      try {
+        const { status, body } = await this.fetchFollowing(url, jar, session.userAgent, accept);
+        if (status === 200 || (!isChallenge(status, body) && status < 300)) {
+          // Persist refreshed session cookies (e.g. new JSESSIONID) for subsequent requests.
+          this.session = { ...session, cookieHeader: serializeJar(jar) };
+          return body;
+        }
+        lastError = undefined; // a challenge/redirect, not a thrown error
+      } catch (err) {
+        // Raw network failure ("fetch failed", connection reset) — often a stale session.
+        lastError = err;
       }
-      // Challenge or unresolved redirect — re-mint cookie and retry once.
+      // Challenge, unresolved redirect, or network error — re-mint the cookie and retry once.
       this.session = await this.minter.mint();
       session = this.session;
+    }
+    if (lastError) {
+      throw new Error(`Request to ${url} failed: ${lastError instanceof Error ? lastError.message : String(lastError)}`, {
+        cause: lastError,
+      });
     }
     throw new CloudflareChallengeError(url);
   }

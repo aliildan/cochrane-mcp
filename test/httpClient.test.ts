@@ -43,6 +43,28 @@ describe("HttpClient", () => {
     vi.unstubAllGlobals();
   });
 
+  test("retries once after a thrown network error (stale session), then succeeds", async () => {
+    const minter: Minter = { mint: vi.fn().mockResolvedValue(session()) };
+    const h200 = { get: () => null, getSetCookie: () => [] };
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError("fetch failed"))
+      .mockResolvedValueOnce({ status: 200, headers: h200, text: async () => "GOOD" });
+    vi.stubGlobal("fetch", fetchMock);
+    const c = new HttpClient(minter);
+    expect(await c.fetchText("https://x")).toBe("GOOD");
+    expect(minter.mint).toHaveBeenCalledTimes(2); // initial + re-mint after the error
+    vi.unstubAllGlobals();
+  });
+
+  test("rethrows a network error that persists across the retry", async () => {
+    const minter: Minter = { mint: vi.fn().mockResolvedValue(session()) };
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("fetch failed")));
+    const c = new HttpClient(minter);
+    await expect(c.fetchText("https://x")).rejects.toThrow(/fetch failed/);
+    vi.unstubAllGlobals();
+  });
+
   test("follows redirects and carries Set-Cookie forward (session refresh loop)", async () => {
     const minter: Minter = { mint: vi.fn().mockResolvedValue(session()) };
     const h302 = {
