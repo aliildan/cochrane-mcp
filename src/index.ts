@@ -5,7 +5,7 @@ import { HttpClient } from "./engine/httpClient.js";
 import { CdpMinter } from "./engine/minter.js";
 import { createServer } from "./server.js";
 
-export const VERSION = "0.2.0";
+export const VERSION = "0.2.1";
 
 function parsePorts(v: string | undefined): number[] | undefined {
   if (!v) return undefined;
