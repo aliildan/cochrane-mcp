@@ -6,7 +6,8 @@
 
 `cochrane_search` · `cochrane_get_details` · `cochrane_suggest_terms`
 
-[![version](https://img.shields.io/badge/version-0.2.1-blue)](https://github.com/aliildan/cochrane-mcp)
+[![version](https://img.shields.io/badge/version-0.3.0-blue)](https://github.com/aliildan/cochrane-mcp)
+[![npm](https://img.shields.io/npm/v/cochrane-mcp?logo=npm)](https://www.npmjs.com/package/cochrane-mcp)
 [![node](https://img.shields.io/badge/node-%E2%89%A518-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![MCP](https://img.shields.io/badge/Model_Context_Protocol-server-7C3AED)](https://modelcontextprotocol.io)
 
