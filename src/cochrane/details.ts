@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 import type { AnyNode } from "domhandler";
-import type { Author, ReviewDetails } from "../types.js";
+import type { Author, Details, ReviewDetails, TrialDetails } from "../types.js";
+import { detectContentType } from "./urls.js";
 
 type C = cheerio.CheerioAPI;
 
@@ -89,4 +90,36 @@ export function parseReviewDetail(html: string, doi: string): ReviewDetails {
       pdf: one(m, "citation_pdf_url"),
     },
   };
+}
+
+export function parseTrialDetail(html: string, doi: string): TrialDetails {
+  const $ = cheerio.load(html);
+  const m = collectCitationMeta($);
+  const authors: Author[] = (m["citation_author"] ?? []).map((name) => ({ name }));
+  const keywords = (one(m, "citation_keywords") ?? "")
+    .split(";")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  // Trials have no structured abstract sections; take the abstract container text if present.
+  const abstractText = $(".abstract, .full_abstract").first().text().replace(/\s+/g, " ").trim();
+  return {
+    kind: "trial",
+    doi: one(m, "citation_doi") ?? doi,
+    title: one(m, "citation_title") ?? $("h1").first().text().trim(),
+    authors,
+    source: one(m, "citation_journal_title"),
+    date: one(m, "citation_online_date") ?? one(m, "citation_date"),
+    keywords,
+    abstract: abstractText || null,
+    urls: {
+      html: one(m, "citation_fulltext_html_url") ?? `https://www.cochranelibrary.com/central/doi/${doi}/full`,
+      pdf: one(m, "citation_pdf_url"),
+    },
+  };
+}
+
+export function parseDetail(html: string, doi: string): Details {
+  return detectContentType(doi) === "central"
+    ? parseTrialDetail(html, doi)
+    : parseReviewDetail(html, doi);
 }
