@@ -124,8 +124,8 @@ publish (this bit us going 0.3.0→0.3.1). Each release:
 
 1. Bump the version everywhere (package.json, `.claude-plugin/plugin.json` `version`, `src/server.ts`,
    `src/index.ts` `VERSION`, `test/smoke.test.ts`, README badge).
-2. **Also bump the pinned npx version** in `.claude-plugin/plugin.json` and `.mcp.json`
-   (`cochrane-mcp@X.Y.Z`).
+2. **Also bump the pinned npx version** in `.claude-plugin/plugin.json`, `.mcp.json`, and the README
+   Manual-install snippet (`cochrane-mcp@X.Y.Z`).
 3. `npm run build && npm test`, commit, push.
 4. `npm publish` (needs the owner's 2FA OTP — only the user can do this).
 5. Users: `/plugin marketplace update cochrane-marketplace` → `/reload-plugins`. The new exact pin is a
