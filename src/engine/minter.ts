@@ -49,6 +49,11 @@ async function fetchUserAgent(endpoint: string): Promise<string | null> {
 
 const hasClearance = (header: string): boolean => /(^|;\s*)cf_clearance=/.test(header);
 
+const errMessage = (err: unknown): string => {
+  const m = err instanceof Error ? err.message : String(err);
+  return m.split("\n")[0];
+};
+
 export interface CdpMinterOptions {
   cdpEndpoint?: string; // explicit endpoint — always used, warmed if needed
   discoverPorts?: number[]; // ports to probe when no explicit endpoint (default 9222, 9444)
@@ -69,24 +74,44 @@ export class CdpMinter implements Minter {
     );
   }
 
+  protected discover(): Promise<string | null> {
+    return discoverCdpEndpoint(this.opts.discoverPorts ?? DEFAULT_DISCOVER_PORTS);
+  }
+
+  private warn(message: string): void {
+    // MCP uses stdout for protocol — diagnostics must go to stderr.
+    console.error(`[cochrane-mcp] ${message}`);
+  }
+
   /**
    * Strategy: explicit endpoint → discovered running Chrome (if it already has clearance)
-   * → self-launch a dedicated persistent Chrome.
+   * → self-launch a dedicated persistent Chrome. Any attach failure (unreachable, CDP protocol
+   * mismatch, no clearance) falls through to the next option so minting always has a path.
    */
   async mint(): Promise<Session> {
-    if (this.opts.cdpEndpoint) return this.mintViaAttach(this.opts.cdpEndpoint, true);
+    if (this.opts.cdpEndpoint) {
+      try {
+        return await this.mintViaAttach(this.opts.cdpEndpoint, true);
+      } catch (err) {
+        this.warn(`attach to ${this.opts.cdpEndpoint} failed (${errMessage(err)}); falling back`);
+      }
+    }
 
-    const discovered = await discoverCdpEndpoint(this.opts.discoverPorts ?? DEFAULT_DISCOVER_PORTS);
-    if (discovered) {
-      // Non-intrusive: only reuse a discovered browser if it already holds clearance.
-      const session = await this.mintViaAttach(discovered, false);
-      if (hasClearance(session.cookieHeader)) return session;
+    try {
+      const discovered = await this.discover();
+      if (discovered) {
+        // Non-intrusive: only reuse a discovered browser if it already holds clearance.
+        const session = await this.mintViaAttach(discovered, false);
+        if (hasClearance(session.cookieHeader)) return session;
+      }
+    } catch (err) {
+      this.warn(`discovered Chrome unusable (${errMessage(err)}); self-launching instead`);
     }
 
     return this.mintViaLaunch();
   }
 
-  private async mintViaAttach(endpoint: string, allowWarm: boolean): Promise<Session> {
+  protected async mintViaAttach(endpoint: string, allowWarm: boolean): Promise<Session> {
     const userAgent = (await fetchUserAgent(endpoint)) ?? FALLBACK_UA;
     const browser = await chromium.connectOverCDP(endpoint);
     try {
@@ -133,7 +158,7 @@ export class CdpMinter implements Minter {
     }
   }
 
-  private async mintViaLaunch(): Promise<Session> {
+  protected async mintViaLaunch(): Promise<Session> {
     const timeoutMs = this.opts.timeoutMs ?? 60000;
     const ctx = await this.launchContext();
     try {
