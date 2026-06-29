@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "cochrane": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "env": { "COCHRANE_CDP_ENDPOINT": "" }
+    }
+  }
+}

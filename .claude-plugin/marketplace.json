@@ -1,0 +1,7 @@
+{
+  "name": "cochrane-marketplace",
+  "owner": { "name": "cochrane-mcp" },
+  "plugins": [
+    { "name": "cochrane", "source": "./", "description": "Cochrane Library search + details MCP." }
+  ]
+}
