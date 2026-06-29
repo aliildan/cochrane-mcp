@@ -47,7 +47,7 @@ Then just ask, or use the bundled command:
 /cochrane statins for primary prevention
 ```
 
-The plugin runs the published package via `npx -y cochrane-mcp@latest` — no build step, no cloning.
+The plugin runs the published package via `npx` (pinned to an exact published version) — no build step, no cloning.
 The first run downloads the package (and, for the self-launch browser fallback, a bundled Chromium).
 
 ## 💬 Usage examples
@@ -185,7 +185,7 @@ Point your MCP client at the published package — no clone, no build:
   "mcpServers": {
     "cochrane": {
       "command": "npx",
-      "args": ["-y", "cochrane-mcp@latest"],
+      "args": ["-y", "cochrane-mcp@0.3.2"],
       "env": { "COCHRANE_CDP_ENDPOINT": "http://127.0.0.1:9444" }
     }
   }
