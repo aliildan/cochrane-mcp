@@ -9,7 +9,7 @@ const fail = (e: unknown) => ({
 });
 
 export function createServer(service: CochraneService): McpServer {
-  const server = new McpServer({ name: "cochrane-mcp", version: "0.3.1" });
+  const server = new McpServer({ name: "cochrane-mcp", version: "0.3.2" });
 
   server.tool(
     "cochrane_search",

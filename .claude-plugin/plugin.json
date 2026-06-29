@@ -1,13 +1,13 @@
 {
   "name": "cochrane",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Search the Cochrane Library (reviews, protocols, trials, clinical answers, editorials) and fetch rich details.",
   "author": { "name": "aliildan" },
   "homepage": "https://github.com/aliildan/cochrane-mcp",
   "mcpServers": {
     "cochrane": {
       "command": "npx",
-      "args": ["-y", "cochrane-mcp@0.3.1"],
+      "args": ["--prefix", "..", "-y", "cochrane-mcp@0.3.2"],
       "env": { "COCHRANE_CDP_ENDPOINT": "" }
     }
   }

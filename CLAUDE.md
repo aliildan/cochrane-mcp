@@ -134,8 +134,20 @@ publish (this bit us going 0.3.0→0.3.1). Each release:
 To force a refresh of a stuck npx copy: `rm -rf ~/.npm/_npx/*/node_modules/cochrane-mcp` (or the whole
 `~/.npm/_npx` cache dir), then reload.
 
+**Why the launcher args are `["--prefix", "..", "-y", "cochrane-mcp@X.Y.Z"]` (not just `["-y", ...]`):**
+Claude Code starts the MCP server with its cwd set to the workspace root. When that workspace **is this
+repo**, `npx cochrane-mcp` matches the local project (same `package.json` `name`), so npm short-circuits
+to the local package — whose own `bin` is never linked into its own `node_modules/.bin` — and dies with
+`sh: cochrane-mcp: command not found`. `--prefix ..` points npm's project root at the repo's parent
+(which has no `cochrane-mcp` manifest), so it stops matching the local project and fetches the published
+package from the registry/cache as intended. It does **not** chdir the server process, so the relative
+`./.cochrane-profile` default is unaffected. End users (in any other dir) never hit the collision; the
+flag is harmless for them. Keep `--prefix ..` in both `.mcp.json` and `.claude-plugin/plugin.json`.
+
 ## Don'ts
 
+- Don't drop `--prefix ..` from the npx launcher args — without it the server fails to connect whenever
+  Claude Code runs from inside this repo (see Releasing).
 - Don't replace mint-then-fetch with plain HTTP (it will fail under Cloudflare).
 - Don't commit `.cochrane-profile/`, `dist/`, or `node_modules/` (see `.gitignore`).
 - Don't hammer the live site in tests — only the gated `live.smoke.test.ts` touches the network.

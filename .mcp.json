@@ -2,7 +2,7 @@
   "mcpServers": {
     "cochrane": {
       "command": "npx",
-      "args": ["-y", "cochrane-mcp@0.3.1"],
+      "args": ["--prefix", "..", "-y", "cochrane-mcp@0.3.2"],
       "env": { "COCHRANE_CDP_ENDPOINT": "" }
     }
   }
