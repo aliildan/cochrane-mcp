@@ -208,13 +208,17 @@ Then use `"command": "node", "args": ["/absolute/path/to/cochrane-mcp/dist/index
 
 ## 🔄 Updating
 
-Because the plugin runs `cochrane-mcp@latest`, you get new versions automatically — just restart the
-server (`/reload-plugins`, or reconnect `cochrane` from the `/mcp` menu). To refresh the plugin's
-skill/command too:
+The plugin pins an exact published version, so updating is a marketplace refresh + reload:
 
 ```text
 /plugin marketplace update cochrane-marketplace
 /reload-plugins
+```
+
+If an old build seems stuck (npx caches packages), clear the cache once and reload:
+
+```bash
+rm -rf ~/.npm/_npx/*/node_modules/cochrane-mcp
 ```
 
 ## 🩹 Troubleshooting

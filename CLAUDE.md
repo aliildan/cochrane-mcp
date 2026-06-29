@@ -116,6 +116,24 @@ live URLs (search-review, search-central, detail-review, detail-trial, pico.json
 suggest.json) while carrying a valid `cf_clearance` cookie, and overwrite `test/fixtures/`. Then make
 the offline tests pass against the new markup.
 
+## Releasing
+
+Distribution is npm + npx; the plugin runs `npx -y cochrane-mcp@<exact>`. **Pin the exact version**
+(not `@latest`) — `npx @latest` caches the resolved package and serves a stale copy even after a new
+publish (this bit us going 0.3.0→0.3.1). Each release:
+
+1. Bump the version everywhere (package.json, `.claude-plugin/plugin.json` `version`, `src/server.ts`,
+   `src/index.ts` `VERSION`, `test/smoke.test.ts`, README badge).
+2. **Also bump the pinned npx version** in `.claude-plugin/plugin.json` and `.mcp.json`
+   (`cochrane-mcp@X.Y.Z`).
+3. `npm run build && npm test`, commit, push.
+4. `npm publish` (needs the owner's 2FA OTP — only the user can do this).
+5. Users: `/plugin marketplace update cochrane-marketplace` → `/reload-plugins`. The new exact pin is a
+   fresh npx cache key, so it fetches the new version instead of reusing the cache.
+
+To force a refresh of a stuck npx copy: `rm -rf ~/.npm/_npx/*/node_modules/cochrane-mcp` (or the whole
+`~/.npm/_npx` cache dir), then reload.
+
 ## Don'ts
 
 - Don't replace mint-then-fetch with plain HTTP (it will fail under Cloudflare).
