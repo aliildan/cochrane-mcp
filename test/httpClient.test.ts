@@ -42,4 +42,26 @@ describe("HttpClient", () => {
     await expect(c.fetchText("https://x")).rejects.toBeInstanceOf(CloudflareChallengeError);
     vi.unstubAllGlobals();
   });
+
+  test("follows redirects and carries Set-Cookie forward (session refresh loop)", async () => {
+    const minter: Minter = { mint: vi.fn().mockResolvedValue(session()) };
+    const h302 = {
+      get: (k: string) => (k.toLowerCase() === "location" ? "https://x/cdsr" : null),
+      getSetCookie: () => ["JSESSIONID=fresh; Path=/; HttpOnly"],
+    };
+    const h200 = { get: () => null, getSetCookie: () => [] };
+    const sent: string[] = [];
+    const fetchMock = vi.fn(async (_url: string, opts: { headers: Record<string, string> }) => {
+      sent.push(opts.headers.Cookie);
+      return fetchMock.mock.calls.length === 1
+        ? { status: 302, headers: h302, text: async () => "" }
+        : { status: 200, headers: h200, text: async () => "FINAL" };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const c = new HttpClient(minter);
+    expect(await c.fetchText("https://x/cdsr")).toBe("FINAL");
+    expect(sent[1]).toContain("JSESSIONID=fresh"); // cookie from the 302 carried into the retry
+    expect(minter.mint).toHaveBeenCalledTimes(1); // resolved without a challenge re-mint
+    vi.unstubAllGlobals();
+  });
 });

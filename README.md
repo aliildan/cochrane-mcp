@@ -33,17 +33,34 @@ Add to your MCP config (use the absolute path to the clone):
   "env": { "COCHRANE_CDP_ENDPOINT": "http://127.0.0.1:9444" } } } }
 ```
 
-## Cloudflare / browser setup
-Two modes:
-- **Attach (recommended):** start Chrome with remote debugging and set `COCHRANE_CDP_ENDPOINT`:
-  ```
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9444
-  ```
-  Browse to cochranelibrary.com once so the session holds a `cf_clearance` cookie.
-- **Auto-launch (default, no endpoint):** the server launches its own Chrome with a dedicated
-  profile (`COCHRANE_PROFILE_DIR`, default `./.cochrane-profile`). Solve the one-time Cloudflare
-  challenge in the window; the cookie persists for later runs. Requires `npx patchright install chromium`
-  (or a Chrome install for `channel: "chrome"`).
+## Cloudflare / browser setup (automatic)
+
+The cookie minting is automatic — you normally don't configure anything. On each mint the server:
+
+1. **Explicit** — if `COCHRANE_CDP_ENDPOINT` is set, attaches to that Chrome (and warms it if needed).
+2. **Discover** — otherwise probes `127.0.0.1:9222` and `:9444` (override with `COCHRANE_CDP_PORTS`).
+   If a debug Chrome is running and already holds a `cf_clearance` cookie, it's reused. Connecting is
+   read-only and does **not** close your browser.
+3. **Self-launch** — otherwise launches its own Chrome (system Chrome if present, else the bundled
+   Chromium) with a persistent profile (`COCHRANE_PROFILE_DIR`, default `./.cochrane-profile`),
+   clears the challenge, and reuses the cookie for later runs.
+
+The bundled Chromium is installed automatically on `npm install` (postinstall) or via `npm run setup`.
+
+**The one manual moment:** if Cloudflare escalates to an *interactive* Turnstile (rare — happens under a
+flagged IP / detected automation), the self-launched window will show it and you click once; the cookie
+then persists. No software can bypass an interactive Turnstile without a paid CAPTCHA service.
+
+### Environment variables
+| var | effect |
+|---|---|
+| `COCHRANE_CDP_ENDPOINT` | Attach to this CDP endpoint (e.g. `http://127.0.0.1:9444`). Skips discovery. |
+| `COCHRANE_CDP_PORTS` | Comma list of localhost ports to probe (default `9222,9444`). |
+| `COCHRANE_PROFILE_DIR` | Persistent profile dir for self-launch (default `./.cochrane-profile`). |
+| `COCHRANE_HEADLESS` | `1` to self-launch headless (faster, but more likely to be challenged). |
+
+Tip for the most reliable hands-off setup: keep a Chrome running with `--remote-debugging-port=9222`
+that has visited cochranelibrary.com once — discovery will reuse its organic clearance every time.
 
 ## Tools
 

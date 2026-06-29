@@ -24,9 +24,18 @@ of the whole codebase. Empirically (see `docs/superpowers/specs/`):
   and mints a `cf_clearance` cookie.
 
 So the engine is **mint-then-fetch**:
-1. `CdpMinter` obtains `cf_clearance` from a real browser (attach via CDP, or auto-launch).
+1. `CdpMinter` obtains `cf_clearance` from a real browser, choosing automatically:
+   **explicit** `COCHRANE_CDP_ENDPOINT` → **discover** a running debug Chrome on `127.0.0.1:9222/9444`
+   (reused only if it already holds clearance; connecting is read-only and never closes the user's
+   Chrome) → **self-launch** a persistent-profile Chrome (system Chrome, else bundled Chromium).
 2. `HttpClient` replays that cookie + the browser's User-Agent in fast plain `fetch` calls.
 3. On a 412/challenge it refreshes the cookie once and retries.
+
+**Redirect handling matters:** Cochrane (Liferay/Atypon) answers detail pages with a `302 → same URL`
+that sets a fresh `JSESSIONID`/`SID_REP`/`SCOLAUTHSESSIONID`. `HttpClient.fetchFollowing` therefore
+follows redirects **manually**, merging each hop's `Set-Cookie` into the jar (like a browser) — using
+`fetch`'s automatic redirect (fixed Cookie header) loops forever (`redirect count exceeded`). Don't
+revert this to `redirect: "follow"`.
 
 **Do not** "simplify" this back to plain HTTP — it will appear to work from a clean IP and then fail
 under load. The cookie is **IP + User-Agent bound**, so the server and its minting Chrome must run on
@@ -41,8 +50,8 @@ src/
   types.ts            # zod input schemas + TS output types + param enums (single source of truth)
   engine/
     session.ts        # Session + Minter interfaces
-    httpClient.ts     # isChallenge(), HttpClient (fetch + refresh-on-412), CloudflareChallengeError
-    minter.ts         # CdpMinter: mintViaAttach (CDP) / mintViaLaunch (persistent profile)
+    httpClient.ts     # isChallenge(), HttpClient (manual redirect + cookie jar + refresh-on-412), CloudflareChallengeError
+    minter.ts         # CdpMinter (explicit/discover/self-launch) + discoverCdpEndpoint()
   cochrane/
     urls.ts           # buildSearchUrl / buildSuggestUrl / buildDetailUrl / buildJsonResourceUrl, detectContentType
     search.ts         # parseSearchResults — .search-results-item, .results-number, typeCounts
