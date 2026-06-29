@@ -2,7 +2,8 @@
   "name": "cochrane",
   "version": "0.1.0",
   "description": "Search the Cochrane Library (reviews, protocols, trials, clinical answers, editorials) and fetch rich details.",
-  "author": { "name": "cochrane-mcp" },
+  "author": { "name": "aliildan" },
+  "homepage": "https://github.com/aliildan/cochrane-mcp",
   "mcpServers": {
     "cochrane": {
       "command": "node",

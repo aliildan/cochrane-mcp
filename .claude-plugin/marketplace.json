@@ -1,6 +1,6 @@
 {
   "name": "cochrane-marketplace",
-  "owner": { "name": "cochrane-mcp" },
+  "owner": { "name": "aliildan", "url": "https://github.com/aliildan" },
   "plugins": [
     { "name": "cochrane", "source": "./", "description": "Cochrane Library search + details MCP." }
   ]

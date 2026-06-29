@@ -3,6 +3,11 @@
 MCP server for searching the **Cochrane Library** and fetching review/trial details.
 Tools: `cochrane_search`, `cochrane_get_details`, `cochrane_suggest_terms`.
 
+Repo: <https://github.com/aliildan/cochrane-mcp>
+
+> **Heads-up:** Cochrane sits behind a Cloudflare challenge that plain HTTP clients cannot pass.
+> This server clears it with a real Chrome (mint-then-fetch) — see [Cloudflare / browser setup](#cloudflare--browser-setup).
+
 ## How it works
 Cochrane is behind Cloudflare. The server mints a `cf_clearance` cookie using a real Chrome
 (via the DevTools Protocol), then replays it in fast `fetch` calls. The cookie is IP+UA bound,
@@ -10,17 +15,21 @@ so the server and the Chrome it uses must run on the same machine.
 
 ## Install (Claude Code plugin)
 ```
-/plugin marketplace add <owner>/<repo>
+/plugin marketplace add aliildan/cochrane-mcp
 /plugin install cochrane@cochrane-marketplace
 ```
+The plugin auto-registers the MCP server. You still need a reachable Chrome (see below). Because the
+server runs from built output, after installing run `npm install && npm run build` in the plugin dir.
 
 ## Manual install
-```
+```bash
+git clone git@github.com:aliildan/cochrane-mcp.git
+cd cochrane-mcp
 npm install && npm run build
 ```
-Add to your MCP config:
+Add to your MCP config (use the absolute path to the clone):
 ```json
-{ "mcpServers": { "cochrane": { "command": "node", "args": ["/abs/path/dist/index.js"],
+{ "mcpServers": { "cochrane": { "command": "node", "args": ["/absolute/path/to/cochrane-mcp/dist/index.js"],
   "env": { "COCHRANE_CDP_ENDPOINT": "http://127.0.0.1:9444" } } } }
 ```
 

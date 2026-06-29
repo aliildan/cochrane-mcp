@@ -1,4 +1,64 @@
+# ---- Dependencies ----
 node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ---- Build output ----
 dist/
+build/
+out/
+*.tsbuildinfo
+
+# ---- Test / coverage ----
+coverage/
+.nyc_output/
+*.lcov
+.vitest/
+
+# ---- Logs ----
+logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- Runtime / app state ----
+# Dedicated Chrome profile the auto-launch minter creates (holds cf_clearance cookie)
 .cochrane-profile/
+# Any alternate profile dir pointed at by COCHRANE_PROFILE_DIR
+.cochrane-*/
+
+# ---- Environment / secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Caches ----
+.cache/
+.npm/
+.eslintcache
+.turbo/
+
+# ---- Editors / IDEs ----
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- OS junk ----
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
