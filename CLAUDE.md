@@ -16,7 +16,7 @@ Tools exposed:
 ## ⚠️ The one thing you must understand: Cloudflare
 
 The Cochrane Library is behind a **Cloudflare JS/managed challenge**. This is the defining constraint
-of the whole codebase. Empirically (see `docs/superpowers/specs/`):
+of the whole codebase. Empirically:
 
 - Plain `fetch` / `curl` / TLS-impersonation (`impit`) → **HTTP 412** once the IP is flagged.
 - A freshly **automation-launched** headless *or* headful Chrome also fails to clear the challenge.
@@ -62,13 +62,12 @@ src/
 test/
   fixtures/           # REAL captured HTML/JSON — parser tests run fully offline against these
   *.test.ts           # 10 offline suites + 1 gated live smoke test
-docs/superpowers/     # spec (design) + plan (task breakdown)
 ```
 
 Data flows one direction: `service` builds a URL (`urls.ts`) → `httpClient.fetchText` → a `parse*`
 function → typed result. Keep parsing pure and fixture-tested; keep network/Cloudflare concerns in `engine/`.
 
-## Reverse-engineered API facts (verified)
+## Cochrane API facts (verified)
 
 - **Search** is GET HTML at `/en/search?...`. The param **`forceTypeSelection=true` is REQUIRED** or
   `selectedType` is ignored (you silently get reviews).

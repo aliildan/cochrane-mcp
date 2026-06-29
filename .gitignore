@@ -53,6 +53,9 @@ pnpm-debug.log*
 *.swo
 *~
 
+# ---- Local design docs (not tracked in the repo) ----
+docs/
+
 # ---- OS junk ----
 .DS_Store
 .DS_Store?

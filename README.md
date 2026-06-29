@@ -237,8 +237,7 @@ npm run test:watch
 COCHRANE_LIVE_TEST=1 npm test           # + live smoke (auto-discovers a running Chrome)
 ```
 
-Architecture and the full reverse-engineering write-up live in [`docs/superpowers/`](docs/superpowers)
-and [`CLAUDE.md`](CLAUDE.md).
+Architecture and the full implementation write-up live in [`CLAUDE.md`](CLAUDE.md).
 
 ## 📄 License & disclaimer
 
