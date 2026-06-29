@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CochraneService } from "./cochrane/service.js";
 import { HttpClient } from "./engine/httpClient.js";
@@ -26,7 +28,19 @@ async function main() {
   await server.connect(new StdioServerTransport());
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run main() when executed as the CLI/bin entry. realpathSync resolves the bin symlink that
+// `npx`/npm creates, so this stays true under `npx -y cochrane-mcp` (and false when imported in tests).
+function isRunAsScript(): boolean {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    return realpathSync(entry) === fileURLToPath(import.meta.url);
+  } catch {
+    return false;
+  }
+}
+
+if (isRunAsScript()) {
   main().catch((e) => {
     console.error(e);
     process.exit(1);

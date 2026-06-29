@@ -6,8 +6,8 @@
   "homepage": "https://github.com/aliildan/cochrane-mcp",
   "mcpServers": {
     "cochrane": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "cochrane-mcp@latest"],
       "env": { "COCHRANE_CDP_ENDPOINT": "" }
     }
   }

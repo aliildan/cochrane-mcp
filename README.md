@@ -46,8 +46,8 @@ Then just ask, or use the bundled command:
 /cochrane statins for primary prevention
 ```
 
-> First-time build: the plugin runs from compiled output, so once in the plugin directory run
-> `npm install && npm run build` (this also downloads the bundled browser used for Cloudflare).
+The plugin runs the published package via `npx -y cochrane-mcp@latest` — no build step, no cloning.
+The first run downloads the package (and, for the self-launch browser fallback, a bundled Chromium).
 
 ## 💬 Usage examples
 
@@ -177,34 +177,44 @@ The cookie is **IP + User-Agent bound**, so the server and its browser must run 
 
 ## 📦 Manual install (any MCP client)
 
-```bash
-git clone git@github.com:aliildan/cochrane-mcp.git
-cd cochrane-mcp
-npm install && npm run build      # postinstall also fetches the bundled browser
-```
+Point your MCP client at the published package — no clone, no build:
 
 ```json
 {
   "mcpServers": {
     "cochrane": {
-      "command": "node",
-      "args": ["/absolute/path/to/cochrane-mcp/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "cochrane-mcp@latest"],
       "env": { "COCHRANE_CDP_ENDPOINT": "http://127.0.0.1:9444" }
     }
   }
 }
 ```
 
+Or install the CLI globally: `npm install -g cochrane-mcp` then use `"command": "cochrane-mcp"`.
+
+<details>
+<summary><b>Run from source instead</b></summary>
+
+```bash
+git clone git@github.com:aliildan/cochrane-mcp.git
+cd cochrane-mcp
+npm install && npm run build      # postinstall also fetches the bundled browser
+```
+Then use `"command": "node", "args": ["/absolute/path/to/cochrane-mcp/dist/index.js"]`.
+
+</details>
+
 ## 🔄 Updating
+
+Because the plugin runs `cochrane-mcp@latest`, you get new versions automatically — just restart the
+server (`/reload-plugins`, or reconnect `cochrane` from the `/mcp` menu). To refresh the plugin's
+skill/command too:
 
 ```text
 /plugin marketplace update cochrane-marketplace
-/plugin install cochrane@cochrane-marketplace
 /reload-plugins
 ```
-
-Then rebuild in the plugin directory: `npm install && npm run build`. (Manual installs: `git pull` then
-`npm install && npm run build`.)
 
 ## 🩹 Troubleshooting
 
